@@ -92,7 +92,7 @@ def events_file(f):
         else:
             i += 1
 
-    print(f"Found {len(ind)} events.")
+    print(f"Found {len(ind)} events in {iq_filename}.")
 
     for i in ind:
         datetime_event = datetime_started + datetime.timedelta(seconds=i*dt)
