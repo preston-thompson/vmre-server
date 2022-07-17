@@ -24,7 +24,7 @@ def write_database(db):
     now = dt.datetime.now()
     db["last_updated"] = now.strftime(cfg.time_format)
     db["last_updated_readable"] = now.strftime(cfg.time_format_readable)
-    json.dump(db, open("vmre_db.json", "w"), indent=4, sort_keys=True)
+    json.dump(db, open(cfg.db_path, "w"), indent=4, sort_keys=True)
 
 def find_files(db):
 
@@ -96,9 +96,9 @@ def main():
 
     print_box(f"VMRE run started. Time is {dt.datetime.now()}.")
 
-    if os.path.exists("vmre_db.json"):
+    if os.path.exists(cfg.db_path):
         print("Database found. Loading...")
-        db = json.load(open("vmre_db.json", "r"))
+        db = json.load(open(cfg.db_path, "r"))
     else:
         print("No database found. Creating a new one...")
         db = {

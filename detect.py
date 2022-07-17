@@ -106,25 +106,25 @@ def detect_t(x):
         Pxx /= np.median(Pxx)
 
         if cfg.debug_plots:
-            plt.imsave(f"plots/{t_start_str}-0-station{datafile['station_id']}-0-raw.png", Pxx)
+            plt.imsave(f"{cfg.plot_path}/{t_start_str}-0-station{datafile['station_id']}-0-raw.png", Pxx)
 
         # Clip noise
         t_std = np.std(Pxx)
         t_thr = t_std*cfg.sig + 1
         Pxx = np.clip(Pxx - t_thr, 0, None)
         if cfg.debug_plots:
-            plt.imsave(f"plots/{t_start_str}-0-station{datafile['station_id']}-1-clipped.png", Pxx)
+            plt.imsave(f"{cfg.plot_path}/{t_start_str}-0-station{datafile['station_id']}-1-clipped.png", Pxx)
 
         # Apply median filter
         Pxx = signal.medfilt2d(Pxx, 3)
         if cfg.debug_plots:
-            plt.imsave(f"plots/{t_start_str}-0-station{datafile['station_id']}-2-median.png", Pxx)
+            plt.imsave(f"{cfg.plot_path}/{t_start_str}-0-station{datafile['station_id']}-2-median.png", Pxx)
         t_P.append(Pxx)
 
     t_P = np.asarray(t_P)
     nonzeros = np.count_nonzero(t_P, axis=0)
     if cfg.debug_plots:
-        plt.imsave(f"plots/{t_start_str}-1-combined.png", nonzeros)
+        plt.imsave(f"{cfg.plot_path}/{t_start_str}-1-combined.png", nonzeros)
 
     E = np.sum(nonzeros)
 
@@ -138,7 +138,7 @@ def detect_t(x):
     for i in range(cfg.min_observations-1, len(cfg.stations)):
         tmp = np.clip(nonzeros - i, 0, 1)
         if cfg.debug_plots:
-            plt.imsave(f"plots/{t_start_str}-2-observations-{i+1}.png", tmp)
+            plt.imsave(f"{cfg.plot_path}/{t_start_str}-2-observations-{i+1}.png", tmp)
         e = np.sum(tmp)
         energies.append(e)
         if e >= cfg.thr[i]:

@@ -11,7 +11,7 @@ import numpy as np
 from scipy import signal
 import scipy
 
-import config
+import config as cfg
 
 from multiprocessing import Pool
 
@@ -21,12 +21,12 @@ def plot(db):
 
     for event in db["events"].values():
         
-        event_time = datetime.datetime.strptime(event["datetime_str"], config.time_format)
+        event_time = datetime.datetime.strptime(event["datetime_str"], cfg.time_format)
 
         for file in db["files"].values():
 
             # Check if station has any data for this event
-            start = datetime.datetime.strptime(file["params"]["datetime_started"], config.time_format_data)
+            start = datetime.datetime.strptime(file["params"]["datetime_started"], cfg.time_format_data)
             file_duration = file["size"] / file["params"]["bandwidth"] / 8
             end = start + datetime.timedelta(seconds=file_duration)
             if event_time < start or event_time > end:
@@ -44,8 +44,8 @@ def plot(db):
             if start_idx < 0:
                 start_idx = 0
                 start_t = 0
-            end_idx = int(((event_time-start).total_seconds() + config.dt) * file["params"]["bandwidth"])
-            end_t = config.dt
+            end_idx = int(((event_time-start).total_seconds() + cfg.dt) * file["params"]["bandwidth"])
+            end_t = cfg.dt
             if end_idx >= file["size"]//8:
                 end_idx = file["size"]//8
 
@@ -65,21 +65,21 @@ def plot(db):
 
     # Generate 'daily detections' chart. Create y-axis first
     events_per_day = []
-    for i in range(len(config.stations)):
-        events_per_day.append([0] * (config.analyze_days))
+    for i in range(len(cfg.stations)):
+        events_per_day.append([0] * (cfg.analyze_days))
     for e in db['events'].values():
         today = datetime.datetime.strptime(datetime.datetime.now().strftime("%Y%m%d"), "%Y%m%d")
-        event_time = datetime.datetime.strptime(datetime.datetime.strptime(e["datetime_str"], config.time_format).strftime("%Y%m%d"), "%Y%m%d")
+        event_time = datetime.datetime.strptime(datetime.datetime.strptime(e["datetime_str"], cfg.time_format).strftime("%Y%m%d"), "%Y%m%d")
         day_delta = (today - event_time).days
-        if day_delta < config.analyze_days:
+        if day_delta < cfg.analyze_days:
             for i in range(e['observations']):
                 events_per_day[i][day_delta] += 1
-    for i in range(len(config.stations)):
+    for i in range(len(cfg.stations)):
         events_per_day[i].reverse()
 
     # Create x-axis for 'daily detections' chart
     x = []
-    for i in range(config.analyze_days):
+    for i in range(cfg.analyze_days):
         x.append( (datetime.datetime.today() - datetime.timedelta(i)).strftime("%m-%d") )
     x.reverse()
 
@@ -87,7 +87,7 @@ def plot(db):
     fig, ax = plt.subplots()
     fig.set_figheight(5)
     fig.set_figwidth(15)
-    for i in range(config.min_observations-1, len(config.stations)):
+    for i in range(cfg.min_observations-1, len(cfg.stations)):
         plt.bar(x, events_per_day[i], label=f"{i+1} Observations")
     # plt.xticks(rotation=90)
     plt.legend()
@@ -97,27 +97,27 @@ def plot(db):
     fig.autofmt_xdate()
     plt.xticks(fontsize=9, rotation=90, ha='center')
     plt.tight_layout()
-    plt.savefig("plots/daily.png")
+    plt.savefig(f"{cfg.plot_path}/daily.png")
     plt.close()
 
     # Create time-of-day chart
     hours = []
-    for i in range(len(config.stations)):
+    for i in range(len(cfg.stations)):
         hours.append([0]*24)
     for e in db['events'].values():
-        event_time = datetime.datetime.strptime(e["datetime_str"], config.time_format)
+        event_time = datetime.datetime.strptime(e["datetime_str"], cfg.time_format)
         hour = event_time.hour
         for i in range(e["observations"]):
             hours[i][hour] += 1
     plt.style.use('dark_background')
-    for i in range(config.min_observations-1, len(config.stations)):
+    for i in range(cfg.min_observations-1, len(cfg.stations)):
         plt.bar(range(24), hours[i], label=f"{i+1} Observations")
     plt.legend()
     plt.title('VMRE Time-of-Day Chart')
     plt.xlabel('Hour')
     plt.ylabel('Number of Detections')
     plt.tight_layout()
-    plt.savefig("plots/timeofday.png")
+    plt.savefig(f"{cfg.plot_path}/timeofday.png")
     plt.close()
 
 def plot_event(p):
@@ -137,16 +137,16 @@ def plot_event(p):
 
     bw = params["bandwidth"]
 
-    dt = config.dt
+    dt = cfg.dt
 
     iq_slice = np.fromfile(file_path, np.complex64, offset=start_idx*8, count=end_idx-start_idx)
     iq_slice = iq_slice - np.mean(iq_slice)
 
     plots = []
 
-    for NFFT in config.NFFTs:
+    for NFFT in cfg.NFFTs:
 
-        plot_path = f"plots/waterfall_{event['datetime_str']}_station{file['station_id']}_FFT{NFFT}.png"
+        plot_path = f"{cfg.plot_path}/waterfall_{event['datetime_str']}_station{file['station_id']}_FFT{NFFT}.png"
         plots.append(plot_path)
 
         if os.path.exists(plot_path) and os.path.getmtime(file_path) < os.path.getmtime(plot_path):
@@ -154,7 +154,7 @@ def plot_event(p):
 
         print(f"Plotting event {event['datetime_str']} NFFT={NFFT} ({file_path}[{start_idx}:{end_idx}]).")
 
-        plt.figure(figsize=(7*len(iq_slice)/bw/(config.dt),6))
+        plt.figure(figsize=(7*len(iq_slice)/bw/(cfg.dt),6))
         Pxx, freqs, bins, im = plt.specgram(iq_slice, NFFT=NFFT, Fs=bw, noverlap=NFFT/2, cmap=cc.cm.bmw, xextent=(start_t, start_t+len(iq_slice)/bw))
 
         plt.ylabel("Doppler shift (Hz)")
@@ -169,18 +169,12 @@ def plot_event(p):
 
         #vmin = 10 * np.log10(np.median(Pxx))
         #vmax = 10 * np.log10(np.max(Pxx))
-        vmin = config.plot_min_dB
-        vmax = config.plot_max_dB
+        vmin = cfg.plot_min_dB
+        vmax = cfg.plot_max_dB
         im.set_clim(vmin=vmin, vmax=vmax)
 
         plt.colorbar(im).set_label("Relative Power (dB)")
         plt.savefig(plot_path, bbox_inches="tight")
         plt.close()
-
-    # audio = iq_slice.real
-    # audio -= np.mean(audio)
-    # factor = 32767 / (np.max(audio) - np.min(audio))
-    # audio *= factor
-    # scipy.io.wavfile.write(f"plots/{event['datetime_str']}_station{file['station_id']}.wav", params["bandwidth"], audio.astype(np.int16))
 
     return plots
