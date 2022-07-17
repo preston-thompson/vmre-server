@@ -17,7 +17,8 @@
 
     <body>
         <h1><a href="index.php">Main page</a></h1>
-<!--
+
+<!-- todo: create "next event" and "prev event" buttons
         <table>
             <tr>
                 <td><h1>

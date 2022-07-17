@@ -4,6 +4,7 @@
     error_reporting(E_ALL);
     $string = file_get_contents("vmre_db.json");
     $json_a = json_decode($string, true);
+    // todo: open a json file that contains a list of all events marked as interference
 ?>
 
 <!DOCTYPE html>
@@ -22,7 +23,7 @@
 
         <p>The source code for VMRE can be found at <a href="https://github.com/preston-thompson/vmre-server">GitHub</a>.</p>
 
-<!--
+<!--todo: display something here for station status
 		<h2>Station status</h2>
 
         <table>
@@ -64,6 +65,7 @@
             </tr>
 
             <?php foreach ($json_a['events'] as $event) : ?>
+                <!-- todo: skip event if its been flagged as interference -->
                 <tr>
                     <td><a href="plot.php?event=<?=$event['datetime_str']?>"><?=$event['datetime_readable']?></a></td>
                     <td><?=$event['energy']?></td>
