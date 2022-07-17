@@ -131,8 +131,6 @@ def plot_event(p):
     
     plt.style.use("dark_background")
 
-    plots = {}
-
     params = file["params"]
 
     bw = params["bandwidth"]
@@ -146,8 +144,9 @@ def plot_event(p):
 
     for NFFT in cfg.NFFTs:
 
-        plot_path = f"{cfg.plot_path}/waterfall_{event['datetime_str']}_station{file['station_id']}_FFT{NFFT}.png"
-        plots.append(plot_path)
+        plot_filename = f"waterfall_{event['datetime_str']}_station{file['station_id']}_FFT{NFFT}.png"
+        plot_path = f"{cfg.plot_path}/{plot_filename}"
+        plots.append(f"plots/{plot_filename}") # todo: clean this up
 
         if os.path.exists(plot_path) and os.path.getmtime(file_path) < os.path.getmtime(plot_path):
             continue
@@ -167,8 +166,6 @@ def plot_event(p):
         cb = plt.colorbar()
         cb.remove()
 
-        #vmin = 10 * np.log10(np.median(Pxx))
-        #vmax = 10 * np.log10(np.max(Pxx))
         vmin = cfg.plot_min_dB
         vmax = cfg.plot_max_dB
         im.set_clim(vmin=vmin, vmax=vmax)

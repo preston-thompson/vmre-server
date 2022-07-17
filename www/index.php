@@ -65,7 +65,7 @@
 
             <?php foreach ($json_a['events'] as $event) : ?>
                 <tr>
-                    <td><a href="plot.php"><?=$event['datetime_readable']?></a></td>
+                    <td><a href="plot.php?event=<?=$event['datetime_str']?>"><?=$event['datetime_readable']?></a></td>
                     <td><?=$event['energy']?></td>
                     <td><?=$event['freqshift']?></td>
                     <td><?=$event['velocity']?></td>

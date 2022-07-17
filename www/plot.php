@@ -1,12 +1,23 @@
-<!DOCTYPE html>
+<?php
+    ini_set('display_errors', 1);
+    ini_set('display_startup_errors', 1);
+    error_reporting(E_ALL);
+    $string = file_get_contents("vmre_db.json");
+    $json_a = json_decode($string, true);
+    $event_datetime_str = $_GET['event'];
+    $event = $json_a['events'][$event_datetime_str];
+?>
 
+<!DOCTYPE html>
 <html>
     <head>
-        <title>${event['datetime_readable']}</title>
+        <title><?=$event['datetime_readable']?></title>
         <link rel="stylesheet" href="style.css">
     </head>
 
     <body>
+        <h1><a href="index.php">Main page</a></h1>
+<!--
         <table>
             <tr>
                 <td><h1>
@@ -28,29 +39,26 @@
                 </h1></td>
             </tr>
         </table>
+-->
 
-% for plot in event["plots"]:
-        <img src="${plot.split('/')[1]}">
-% endfor
+        <?php foreach ($event['plots'] as $plot) : ?>
+            <img src="<?=$plot?>">
+        <?php endforeach; ?>
 
         <br>
 
         <table>
             <tr>
                 <td>Energy</td>
-                <td>${'{0}'.format(int(event["energy"]))}</td>
+                <td><?=$event['energy']?></td>
             </tr>
             <tr>
                 <td>Frequency Shift (Hz)</td>
-                <td>${'{0:.2f}'.format(event["freqshift"])}</td>
+                <td><?=$event['freqshift']?></td>
             </tr>
             <tr>
                 <td>Velocity (m/s)</td>
-                <td>${'{0:.1f}'.format(event["velocity"])}</td>
-            </tr>
-            <tr>
-            	<td>Observations</td>
-            	<td>${event["observations"]}</td>
+                <td><?=$event['velocity']?></td>
             </tr>
         </table>
 

@@ -113,10 +113,10 @@ def main():
     print(f"Detecting events. Time is {time.time() - start_time}.")
     detect(db)
 
-    write_database(db)
-
     print(f"Plotting data. Time is {time.time() - start_time}.")
     plot(db)
+
+    write_database(db)
 
     print(f"VMRE run completed. Time is {time.time() - start_time}.")
 
