@@ -8,7 +8,6 @@ import time
 
 from detect import detect
 from plot import plot
-from pages import pages
 
 import config as cfg
 
@@ -106,8 +105,7 @@ def main():
             "files": {},
         }
 
-    os.makedirs("html", exist_ok=True)
-    os.makedirs("plots", exist_ok=True)
+    os.makedirs(cfg.plot_path, exist_ok=True)
 
     print(f"Finding files. Time is {time.time() - start_time}.")
     find_files(db)
@@ -119,9 +117,6 @@ def main():
 
     print(f"Plotting data. Time is {time.time() - start_time}.")
     plot(db)
-
-    print(f"Generating pages. Time is {time.time() - start_time}.")
-    pages(db)
 
     print(f"VMRE run completed. Time is {time.time() - start_time}.")
 

@@ -1,3 +1,11 @@
+<?php
+    ini_set('display_errors', 1);
+    ini_set('display_startup_errors', 1);
+    error_reporting(E_ALL);
+    $string = file_get_contents("vmre_db.json");
+    $json_a = json_decode($string, true);
+?>
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -14,10 +22,7 @@
 
         <p>The source code for VMRE can be found at <a href="https://github.com/preston-thompson/vmre-server">GitHub</a>.</p>
 
-        <p>This page was last updated ${db['last_updated_readable']}.</p>
-
-        <p>Showing last ${config.analyze_days} days worth of data.</p>
-
+<!--
 		<h2>Station status</h2>
 
         <table>
@@ -42,34 +47,30 @@
             </tr>
 % endfor
         </table>
+-->
 
 		<h2>Summary charts</h2>
 
-        <img src="daily.png"><br>
-        <img src="timeofday.png">
+        <img src="plots/daily.png"><br>
+        <img src="plots/timeofday.png">
 
-        <h2>Detections (${len(db['events'])})</h2>
+        <h2>Detections</h2>
         <table>
             <tr>
                 <th>Time</th>
                 <th>Energy</th>
                 <th>Frequency Shift (Hz)</th>
                 <th>Velocity (m/s)</th>
-                <th>Observations</th>
-                <th colspan="3">Stations Online</th>
             </tr>
-% for e in reversed(sorted(db['events'].values(), key=lambda k: k['datetime_str'])):
-            <tr>
-                <td><a href="${e['datetime_str']}.html">${e["datetime_readable"]}</a></td>
-                <td>${'{0}'.format(int(e["energy"]))}</td>
-                <td>${'{0:.2f}'.format(e["freqshift"])}</td>
-                <td>${'{0:.1f}'.format(e["velocity"])}</td>
-                <td>${e["observations"]}</td>
-        % for station_id in (1,2,3):
-                <td style="background: ${'green' if station_id in e['stations_online'] else 'red'}; text-align: center;">${station_id}</td>
-        %endfor
-            </tr>
-% endfor
+
+            <?php foreach ($json_a['events'] as $event) : ?>
+                <tr>
+                    <td><a href="plot.php"><?=$event['datetime_readable']?></a></td>
+                    <td><?=$event['energy']?></td>
+                    <td><?=$event['freqshift']?></td>
+                    <td><?=$event['velocity']?></td>
+                </tr>
+            <?php endforeach; ?>
         </table>
 
     </body>
